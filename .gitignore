@@ -1,0 +1,6 @@
+json-data/
+composer.json
+scraping-ps-php.zip
+vendor/
+composer.lock
+.DS_Store
