@@ -1,6 +1,5 @@
 <?php
 // app/models/Report.php
-require_once 'database.php';
 
 class Report
 {

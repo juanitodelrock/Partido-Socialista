@@ -9,8 +9,7 @@ class Database {
     }
 
     private function connect() {
-
-        $this->connection = new mysqli(BD_HOST, DB_USER, DB_PASS, DB_NAME);
+        $this->connection = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
         if ($this->connection->connect_error) {
             die('Error de conexión: ' . $this->connection->connect_error);
@@ -18,7 +17,11 @@ class Database {
     }
 
     public static function getConnection() {
-        $database = new Database();
-        return $database->connection;
+        try {
+            $database = new Database();
+            return $database->connection;
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
     }
 }

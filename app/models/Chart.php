@@ -1,6 +1,5 @@
 <?php
 // app/models/Chart.php
-require_once 'database.php';
 
 class Chart
 {

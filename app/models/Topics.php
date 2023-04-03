@@ -1,6 +1,5 @@
 <?php
 // app/models/Topic.php
-require_once 'database.php';
 require_once 'User.php';
 
 class Topic {

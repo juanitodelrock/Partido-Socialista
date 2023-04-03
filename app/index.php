@@ -1,8 +1,10 @@
 <?php
 // app/index.php
 session_start();
+
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/models/database.php';
+require_once __DIR__ . '/models/Database.php';
 require_once __DIR__ . '/controllers/HomeController.php';
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'login';

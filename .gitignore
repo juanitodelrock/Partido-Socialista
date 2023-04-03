@@ -1,8 +1,10 @@
 app/lib/vendor/
 twitter/json-data/
-/app/lib/.DS_store
-/app/lib/vendor/.DS_store
 /app/lib/vendor/twitter/.DS_store
 /app/lib/vendor/twitter/json-data/.DS_store
 /app/lib/vendor/twitter/json-data/.gitignore
 /app/lib/composer.lock
+*.env
+/vendor/*
+.DS_Store
+

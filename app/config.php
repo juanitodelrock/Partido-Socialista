@@ -18,46 +18,55 @@ define('HOME_PAGE_URL', ROOT_URL . '/index.php');
 define('DEFAULT_PAGE_SIZE', 10); // número máximo de elementos a mostrar por página
 define('DATE_FORMAT', 'Y-m-d'); // formato de las fechas
 
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 // Constantes para BDD MYsql
-define('DB_HOST' , 'localhost');
-define('DB_NAME' , 'political_monitor');
-define('DB_USER' , 'political_monitor');
-define('DB_PASS' , '2_0,.2_3_$');
+define('DB_HOST', $_ENV['DB_HOST']);
+define('DB_USER', $_ENV['DB_USER']);
+define('DB_PASSWORD', $_ENV['DB_PASSWORD']);
+define('DB_NAME', $_ENV['DB_NAME']);
 
 // Constantes para twitter
 // Datos de autenticación de la API de Twitter
-define('TWITTER_CONSUMER_KEY',"qdjgAxPA4pXzmGRQRsWrBDhLD");
+define('TWITTER_CONSUMER_KEY', "qdjgAxPA4pXzmGRQRsWrBDhLD");
 define('TWITTER_CONSUMER_SECRET', "JwokYSyS2JULPEEWg0vrLZeAsWcp2f7OnQnxjzGk81JTFjor1X");
 define('TWITTER_ACCESS_TOKEN', "3396001858-jMB36N0HGg3sVymzzwxHPSuZdpG7PRkqYavfqQX");
 define('TWITTER_ACCESS_TOKEN_SECRET', "SS04mbGpIwuMBUhFUpZnBRiI6qqnslAqEWf2drHLXdJJC");
 
 // Función para obtener la URL base de la aplicación
-function base_url($path = '') {
+function base_url($path = '')
+{
     return 'https://' . $_SERVER['HTTP_HOST'] . APP_ROOT . '/' . $path;
 }
 
 // Función para redireccionar a una URL
-function redirect($url) {
+function redirect($url)
+{
     header('Location: ' . base_url($url));
     exit();
 }
 
 // Función para obtener el usuario actual
-if(!function_exists('get_current_user')) {
-    function get_current_user() {
+if (!function_exists('get_current_user')) {
+    function get_current_user()
+    {
         return $_SESSION['user_name'];
     }
 }
 
 // Función para comprobar si un usuario es super administrador
-function is_super_admin($user_id) {
+function is_super_admin($user_id)
+{
     $db = new Database();
     $user = new User($db->getConnection());
     return $user->is_super_admin($user_id);
 }
 
 // Función para comprobar si un usuario tiene acceso a un tópico
-function user_has_access_to_topic($user_id, $topic_id) {
+function user_has_access_to_topic($user_id, $topic_id)
+{
     $db = new Database();
     $topic = new Topic($db->getConnection());
     return $topic->user_has_access($user_id, $topic_id);
@@ -156,7 +165,8 @@ function decrypt_data($data, $key)
  * Generar un link con datos adicionales
  * $link = generate_link('search', array('q' => 'política', 'category' => 'noticias'));
  */
-function generate_link($action, $params = array()) {
+function generate_link($action, $params = array())
+{
     $base_url = base_url();
     $query_strings = '';
     if (count($params) > 0) {
@@ -164,6 +174,12 @@ function generate_link($action, $params = array()) {
             $query_strings .= '&' . $key . '=' . urlencode($value);
         }
     }
-    
+
     return $base_url . '?action=' . $action . $query_strings;
+}
+
+function p(){
+    echo "<pre>";
+    print_r(func_get_args());
+    echo "</pre>";
 }
