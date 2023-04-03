@@ -13,6 +13,7 @@ TM
 
 */
 
+require_once __DIR__ . '/../config.php';
 
 // definimos el array con las cuentas de twitter
 $cuentas = array('@pvodanovic', '@fidelsenador', '@alvaroelizalde', '@PSChile');

@@ -1,75 +1,42 @@
 <?php
 
+require_once __DIR__ . '/../app/config.php';
+require_once __DIR__ . '/../app/models/database.php';
+require_once __DIR__ . '/../app/models/Topic.php';
+require_once __DIR__ . '/../app/models/TopicMeta.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+
 // Conectar a la API de Twitter usando la librería "twitteroauth"
-require "vendor/autoload.php";
 use Abraham\TwitterOAuth\TwitterOAuth;
 
-// Datos de autenticación de la API de Twitter
-$consumer_key = "qdjgAxPA4pXzmGRQRsWrBDhLD";
-$consumer_secret = "JwokYSyS2JULPEEWg0vrLZeAsWcp2f7OnQnxjzGk81JTFjor1X";
-$access_token = "3396001858-jMB36N0HGg3sVymzzwxHPSuZdpG7PRkqYavfqQX";
-$access_token_secret = "SS04mbGpIwuMBUhFUpZnBRiI6qqnslAqEWf2drHLXdJJC";
 
-// Conexión a la API de Twitter
-$connection = new TwitterOAuth($consumer_key, $consumer_secret, $access_token, $access_token_secret);
-
-// Array con los nombres de usuario de las cuentas que se quieren obtener información
-$usuarios = array('@pvodanovic', '@fidelsenador', '@alvaroelizalde', '@PSChile');
+// Obtener los tópicos de la base de datos
+$topics = $topicsModel->get_topics();
 
 // Ciclo para obtener información de cada cuenta y guardarla en un archivo JSON
-foreach ($usuarios as $usuario) {
+foreach ($topics as $topic) {
+	$topic_name = $topic['name'];
 
-	// Obtener información de la cuenta
-	$usuario_info = $connection->get("users/show", ["screen_name" => $usuario]);
+	// Verificar si ya se ha obtenido la información de este tópico
+	$exists = $topicsMetaModel->check_topic_meta_exists($topic_name, 'twitter_account');
+	if ($exists) {
+		continue;
+	}
+
+	// Conexión a la API de Twitter
+	$connection = new TwitterOAuth($consumer_key, $consumer_secret, $access_token, $access_token_secret);
+
+	// Obtener información de la cuenta del tópico
+	$user = $connection->get("users/show", ["screen_name" => $topic_name]);
 
 	// Obtener los últimos 400 tweets del usuario
-	$tweets = $connection->get("statuses/user_timeline", ["screen_name" => $usuario, "count" => 400]);
+	$tweets = $connection->get("statuses/user_timeline", ["screen_name" => $topic_name, "count" => 400]);
 
 	// Variables para guardar la información de la cuenta
-	$numero_seguidores = $usuario_info->followers_count;
-	$numero_tweets = $usuario_info->statuses_count;
+	$numero_seguidores = $user->followers_count;
+	$numero_tweets = $user->statuses_count;
 	$numero_retweets = 0;
 	$numero_hashtags_mencionados = 0;
 	$promedio_tweets_dia = 0;
 	$ultimos_400_tweets = array();
-
-	// Contar retweets, hashtags mencionados en los últimos 400 tweets y guardarlos en un arreglo
-	foreach ($tweets as $tweet) {
-		if (isset($tweet->retweeted_status)) {
-			$numero_retweets++;
-		}
-		$hashtags = $tweet->entities->hashtags;
-		foreach ($hashtags as $hashtag) {
-			if (strcasecmp($hashtag->text, $usuario) != 0) {
-				$numero_hashtags_mencionados++;
-			}
-		}
-		$ultimos_400_tweets[] = $tweet->text;
-	}
-
-	// Calcular promedio de tweets por día
-	$fecha_primer_tweet = new DateTime($usuario_info->created_at);
-	$fecha_actual = new DateTime();
-	$diferencia_dias = $fecha_actual->diff($fecha_primer_tweet)->days;
-	if ($diferencia_dias > 0) {
-		$promedio_tweets_dia = round($numero_tweets / $diferencia_dias, 2);
-	}
-
-
-	// Crear un arreglo con la información de la cuenta
-	$info_cuenta = array(
-		"numero_seguidores" => $numero_seguidores,
-		"numero_tweets" => $numero_tweets,
-		"numero_retweets" => $numero_retweets,
-		"numero_hashtags_mencionados" => $numero_hashtags_mencionados,
-		"promedio_tweets_dia" => $promedio_tweets_dia,
-		"ultimos_400_tweets" => $ultimos_400_tweets
-		// Agregar cualquier otra información relevante aquí
-	);
-
-	// Convertir el arreglo a formato JSON y guardarlo en un archivo
-	$nombre_archivo = strtolower(str_replace(" ", "-", $usuario)) . ".json";
-	$ruta_archivo = "json-data/" . $nombre_archivo;
-	$json_cuenta = json_encode($info_cuenta);
-	file_put_contents($ruta_archivo, $json_cuenta);
-}
